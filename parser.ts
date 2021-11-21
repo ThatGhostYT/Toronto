@@ -67,15 +67,24 @@ class Parser{
 							break;
 						}
 
-						const var_val = tokens[++i];
+						const var_val = [];
 
-						ret += `let ${var_name.value} = ${var_val.value};`;
+						while(tokens[i + 1].type !== "EOL"){
+							var_val.push(tokens[++i]);
+						}
+
+						ret += `let ${var_name.value} = ${this.parse(var_val)};`;
 					} else if(var_name.type === "Keyword"){
 						ret = `${var_name.value} is a keyword and cannot be overwritten.`;
 					}
 				} else if(token.value === "print"){
-					const print = tokens[++i];
-					ret += `console.log(${print.value});`;
+					const print = [];
+
+					while(tokens[i + 1].type !== "EOL"){
+						print.push(tokens[++i]);
+					}
+
+					ret += `console.log(${this.parse(print)});`;
 				}
 				continue;
 			}
