@@ -1,27 +1,19 @@
 import {Lexer} from "./lexer.ts";
 import {Parser} from "./parser.ts";
 
-while(true){
-	const cmd = prompt("$eye ~ ");
+const lexer: Lexer = new Lexer();
+const tokens = lexer.lex(Deno.readTextFileSync("./main.eye"));
 
-	if(cmd === "run"){
-		const lexer: Lexer = new Lexer();
-		const parser: Parser = new Parser();
+const parser: Parser = new Parser();
 
-		const tokens = lexer.lex(Deno.readTextFileSync("./main.eye"));
+console.log(tokens);
 
-		console.log("Tokens");
-		console.log(tokens);
-		console.log("\n");
+const ast = parser.parse(tokens);
 
-		const res = parser.parse(tokens);
+console.log(ast);
 
-		console.log("Compiled JavaScript");
-		console.log(res);
-		console.log("\n");
+let compiledJS = parser.compile(ast);
 
-		eval(res);
-	} else if(cmd === "clear"){
-		console.clear();
-	}
-}
+console.log(compiledJS);
+
+eval(compiledJS);

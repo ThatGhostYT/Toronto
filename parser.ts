@@ -1,87 +1,93 @@
 import {Token} from "./Token.ts";
 
-const keywords = [
-	"var"
-];
+interface Program{
+	body: {[key: string]: any}[];
+}
 
 class Parser{
 	parse(tokens: Token[]){
-		let ret: string = "";
+		const program: Program = {
+			body: []
+		}
 
-		for(let i = 0; i < tokens.length; i++){
-			const token = tokens[i];
-
-			if(token.type === "Comment"){
-				ret += `\/\/${token.value}`;
-				continue;
-			}
-
-			if(token.type === "EOL"){
-				ret += "\n";
-				continue;
-			}
-
-			if(token.type === "String"){
-				ret += token.value;
-				continue;
-			}
-
-			if(token.type === "Number"){
-				const operator = tokens[++i];
-
-				if(operator.type === "Operator"){
-					const num = tokens[++i];
-
-					if(num.type === "Number"){
-						switch(operator.value){
-							case "+":
-								ret += token.value + num.value;
-								break;
-							case "-":
-								ret += token.value - num.value;
-								break;
-							case "*":
-								ret += token.value * num.value;
-								break;
-							case "/":
-								ret += token.value / num.value;
-								break;
-							case "%":
-								ret += token.value % num.value;
-								break;
-						}
+		for(let i = 0; i< tokens.length; i++){
+			switch(tokens[i].type){
+				case "Number":
+					if(tokens[i].value.toString().includes(".")){
+						program.body.push({
+							type: "Float",
+							value: tokens[i].value.toString()
+						});
+					} else{
+						program.body.push({
+							type: "Integer",
+							value: tokens[i].value.toString()
+						});
 					}
-				}
-				continue;
-			}
+					break;
+				
+				case "String":
+					program.body.push({
+						type: "String",
+						value: tokens[i].value.slice(1, tokens[i].value.length - 1)
+					});
+					break;
 
-			if(token.type === "Keyword"){
-				if(token.value === "var"){
-					const var_name = tokens[++i];
-
-					if(var_name.type === "Identifier"){
-						const equals = tokens[++i];
-
-						if(equals.type !== "Equals"){
-							ret = `Variable operator must be =`;
-							break;
+				case "Operator":
+					program.body.push({
+						type: "Operator",
+						value: tokens[i].value,
+						expressions: {
+							before: tokens[i - 1].value,
+							after: tokens[i + 1].value
 						}
+					});
+					break;
 
-						const var_val = tokens[++i];
-
-						ret += `let ${var_name.value} = ${var_val};`;
-					} else if(var_name.type === "Keyword"){
-						ret = `${var_name.value} is a keyword and cannot be overwritten.`;
+				case "Keyword":
+					const word = tokens[i].value
+					const expressions = [];
+					while(i < tokens.length && tokens[i].type !== "EOL"){
+						expressions.push(tokens[i].value);
+						i++;
 					}
-				} else if(token.value === "print"){
-					const print = tokens[++i];
 
-					ret += `console.log(${print.value});`;
-				}
-				continue;
+					program.body.push({
+						type: "Keyword",
+						value: word,
+						expressions: expressions.splice(1)
+					});
+					break;
+
+				case "Identifier":
+					program.body.push({
+						type: "Identifier",
+						value: tokens[i].value
+					});
+					break;
 			}
 		}
 		
+		return program;
+	}
+
+	compile(program: Program){
+		let ret = "";
+
+		for(const element of program.body){
+			if(element.type === "Keyword"){
+				switch(element.value){
+					case "print":
+						ret += `console.log(${element.expressions.join("")});`
+						break;
+
+					case "var":
+						ret += `let ${element.expressions.join("")};`;
+						break;
+				}
+			}
+		}
+
 		return ret;
 	}
 }

@@ -12,6 +12,15 @@ class Lexer{
 			"print"
 		]
 
+		let other: {[key: string]: string} = {
+			"(": "LParen",
+			")": "RParen",
+			"[": "LBracket",
+			"]": "RBracket",
+			"{": "LCurlyBracket",
+			"}": "RCurlyBracket"
+		}
+
 		for (let i = 0; i < code.length; i++) {
 			let char = code[i]
 
@@ -20,11 +29,11 @@ class Lexer{
 			}
 			else if (["1", "2", "3", "4", "5", "6", "7", "8", "9"].includes(char)) {
 				let cur = char;
-				while (["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"].includes(code[i + 1]) && i + 1 < code.length) {
+				while (["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "."].includes(code[i + 1]) && i + 1 < code.length) {
 					cur += code[i + 1];
 					i++;
 				}
-				tokens.push(new Token("Number", parseInt(cur)))
+				tokens.push(new Token("Number", cur))
 			}
 			else if (char == '"') {
 				let cur = "";
@@ -40,7 +49,7 @@ class Lexer{
 			}
 			else if (char.match(/[a-zA-Z]+[0-9]*/g)) {
 				let cur = char;
-				while (code[i + 1].match(/[a-zA-Z]+[0-9]*/g) && i + 1 < code.length) {
+				while (code[i + 1]?.match(/[a-zA-Z]+[0-9]*/g) && i + 1 < code.length) {
 					cur += code[i + 1];
 					i++;
 				}
@@ -65,6 +74,9 @@ class Lexer{
 				} else {
 					tokens.push(new Token("Equals", char))
 				}
+			}
+			else if (Object.keys(other).includes(char)) {
+				tokens.push(new Token(other[char], char))
 			}
 		}
 

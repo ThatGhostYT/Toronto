@@ -1,74 +1,79 @@
-const keywords = [
-    "var"
-];
 class Parser {
     parse(tokens) {
-        let ret = "";
+        const program = {
+            body: []
+        };
         for (let i = 0; i < tokens.length; i++) {
-            const token = tokens[i];
-            if (token.type === "Comment") {
-                ret += `\/\/${token.value}`;
-                continue;
-            }
-            if (token.type === "EOL") {
-                ret += "\n";
-                continue;
-            }
-            if (token.type === "String") {
-                ret += token.value;
-                continue;
-            }
-            if (token.type === "Number") {
-                const operator = tokens[++i];
-                if (operator.type === "Operator") {
-                    const num = tokens[++i];
-                    if (num.type === "Number") {
-                        switch (operator.value) {
-                            case "+":
-                                ret += token.value + num.value;
-                                break;
-                            case "-":
-                                ret += token.value - num.value;
-                                break;
-                            case "*":
-                                ret += token.value * num.value;
-                                break;
-                            case "/":
-                                ret += token.value / num.value;
-                                break;
-                            case "%":
-                                ret += token.value % num.value;
-                                break;
+            switch (tokens[i].type) {
+                case "Number":
+                    if (tokens[i].value.toString().includes(".")) {
+                        program.body.push({
+                            type: "Float",
+                            value: tokens[i].value.toString()
+                        });
+                    }
+                    else {
+                        program.body.push({
+                            type: "Integer",
+                            value: tokens[i].value.toString()
+                        });
+                    }
+                    break;
+                case "String":
+                    program.body.push({
+                        type: "String",
+                        value: tokens[i].value.slice(1, tokens[i].value.length - 1)
+                    });
+                    break;
+                case "Operator":
+                    program.body.push({
+                        type: "Operator",
+                        value: tokens[i].value,
+                        expressions: {
+                            before: tokens[i - 1].value,
+                            after: tokens[i + 1].value
                         }
+                    });
+                    break;
+                case "Keyword":
+                    const word = tokens[i].value;
+                    const expressions = [];
+                    while (i < tokens.length && tokens[i].type !== "EOL") {
+                        expressions.push(tokens[i].value);
+                        i++;
                     }
-                }
-                continue;
+                    program.body.push({
+                        type: "Keyword",
+                        value: word,
+                        expressions: expressions.splice(1)
+                    });
+                    break;
+                case "Identifier":
+                    program.body.push({
+                        type: "Identifier",
+                        value: tokens[i].value
+                    });
+                    break;
             }
-            if (token.type === "Keyword") {
-                if (token.value === "var") {
-                    const var_name = tokens[++i];
-                    if (var_name.type === "Identifier") {
-                        const equals = tokens[++i];
-                        if (equals.type !== "Equals") {
-                            ret = `Variable operator must be =`;
-                            break;
-                        }
-                        const var_val = tokens[++i];
-                        ret += `let ${var_name.value} = ${var_val};`;
-                    }
-                    else if (var_name.type === "Keyword") {
-                        ret = `${var_name.value} is a keyword and cannot be overwritten.`;
-                    }
+        }
+        return program;
+    }
+    compile(program) {
+        let ret = "";
+        for (const element of program.body) {
+            if (element.type === "Keyword") {
+                switch (element.value) {
+                    case "print":
+                        ret += `console.log(${element.expressions.join("")});`;
+                        break;
+                    case "var":
+                        ret += `let ${element.expressions.join("")};`;
+                        break;
                 }
-                else if (token.value === "print") {
-                    const print = tokens[++i];
-                    ret += `console.log(${print.value});`;
-                }
-                continue;
             }
         }
         return ret;
     }
 }
 export { Parser };
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiZmlsZTovLy9ob21lL3J1bm5lci9FeWUvcGFyc2VyLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUVBLE1BQU0sUUFBUSxHQUFHO0lBQ2hCLEtBQUs7Q0FDTCxDQUFDO0FBRUYsTUFBTSxNQUFNO0lBQ1gsS0FBSyxDQUFDLE1BQWU7UUFDcEIsSUFBSSxHQUFHLEdBQVcsRUFBRSxDQUFDO1FBRXJCLEtBQUksSUFBSSxDQUFDLEdBQUcsQ0FBQyxFQUFFLENBQUMsR0FBRyxNQUFNLENBQUMsTUFBTSxFQUFFLENBQUMsRUFBRSxFQUFDO1lBQ3JDLE1BQU0sS0FBSyxHQUFHLE1BQU0sQ0FBQyxDQUFDLENBQUMsQ0FBQztZQUV4QixJQUFHLEtBQUssQ0FBQyxJQUFJLEtBQUssU0FBUyxFQUFDO2dCQUMzQixHQUFHLElBQUksT0FBTyxLQUFLLENBQUMsS0FBSyxFQUFFLENBQUM7Z0JBQzVCLFNBQVM7YUFDVDtZQUVELElBQUcsS0FBSyxDQUFDLElBQUksS0FBSyxLQUFLLEVBQUM7Z0JBQ3ZCLEdBQUcsSUFBSSxJQUFJLENBQUM7Z0JBQ1osU0FBUzthQUNUO1lBRUQsSUFBRyxLQUFLLENBQUMsSUFBSSxLQUFLLFFBQVEsRUFBQztnQkFDMUIsR0FBRyxJQUFJLEtBQUssQ0FBQyxLQUFLLENBQUM7Z0JBQ25CLFNBQVM7YUFDVDtZQUVELElBQUcsS0FBSyxDQUFDLElBQUksS0FBSyxRQUFRLEVBQUM7Z0JBQzFCLE1BQU0sUUFBUSxHQUFHLE1BQU0sQ0FBQyxFQUFFLENBQUMsQ0FBQyxDQUFDO2dCQUU3QixJQUFHLFFBQVEsQ0FBQyxJQUFJLEtBQUssVUFBVSxFQUFDO29CQUMvQixNQUFNLEdBQUcsR0FBRyxNQUFNLENBQUMsRUFBRSxDQUFDLENBQUMsQ0FBQztvQkFFeEIsSUFBRyxHQUFHLENBQUMsSUFBSSxLQUFLLFFBQVEsRUFBQzt3QkFDeEIsUUFBTyxRQUFRLENBQUMsS0FBSyxFQUFDOzRCQUNyQixLQUFLLEdBQUc7Z0NBQ1AsR0FBRyxJQUFJLEtBQUssQ0FBQyxLQUFLLEdBQUcsR0FBRyxDQUFDLEtBQUssQ0FBQztnQ0FDL0IsTUFBTTs0QkFDUCxLQUFLLEdBQUc7Z0NBQ1AsR0FBRyxJQUFJLEtBQUssQ0FBQyxLQUFLLEdBQUcsR0FBRyxDQUFDLEtBQUssQ0FBQztnQ0FDL0IsTUFBTTs0QkFDUCxLQUFLLEdBQUc7Z0NBQ1AsR0FBRyxJQUFJLEtBQUssQ0FBQyxLQUFLLEdBQUcsR0FBRyxDQUFDLEtBQUssQ0FBQztnQ0FDL0IsTUFBTTs0QkFDUCxLQUFLLEdBQUc7Z0NBQ1AsR0FBRyxJQUFJLEtBQUssQ0FBQyxLQUFLLEdBQUcsR0FBRyxDQUFDLEtBQUssQ0FBQztnQ0FDL0IsTUFBTTs0QkFDUCxLQUFLLEdBQUc7Z0NBQ1AsR0FBRyxJQUFJLEtBQUssQ0FBQyxLQUFLLEdBQUcsR0FBRyxDQUFDLEtBQUssQ0FBQztnQ0FDL0IsTUFBTTt5QkFDUDtxQkFDRDtpQkFDRDtnQkFDRCxTQUFTO2FBQ1Q7WUFFRCxJQUFHLEtBQUssQ0FBQyxJQUFJLEtBQUssU0FBUyxFQUFDO2dCQUMzQixJQUFHLEtBQUssQ0FBQyxLQUFLLEtBQUssS0FBSyxFQUFDO29CQUN4QixNQUFNLFFBQVEsR0FBRyxNQUFNLENBQUMsRUFBRSxDQUFDLENBQUMsQ0FBQztvQkFFN0IsSUFBRyxRQUFRLENBQUMsSUFBSSxLQUFLLFlBQVksRUFBQzt3QkFDakMsTUFBTSxNQUFNLEdBQUcsTUFBTSxDQUFDLEVBQUUsQ0FBQyxDQUFDLENBQUM7d0JBRTNCLElBQUcsTUFBTSxDQUFDLElBQUksS0FBSyxRQUFRLEVBQUM7NEJBQzNCLEdBQUcsR0FBRyw2QkFBNkIsQ0FBQzs0QkFDcEMsTUFBTTt5QkFDTjt3QkFFRCxNQUFNLE9BQU8sR0FBRyxNQUFNLENBQUMsRUFBRSxDQUFDLENBQUMsQ0FBQzt3QkFFNUIsR0FBRyxJQUFJLE9BQU8sUUFBUSxDQUFDLEtBQUssTUFBTSxPQUFPLEdBQUcsQ0FBQztxQkFDN0M7eUJBQU0sSUFBRyxRQUFRLENBQUMsSUFBSSxLQUFLLFNBQVMsRUFBQzt3QkFDckMsR0FBRyxHQUFHLEdBQUcsUUFBUSxDQUFDLEtBQUssMENBQTBDLENBQUM7cUJBQ2xFO2lCQUNEO3FCQUFNLElBQUcsS0FBSyxDQUFDLEtBQUssS0FBSyxPQUFPLEVBQUM7b0JBQ2pDLE1BQU0sS0FBSyxHQUFHLE1BQU0sQ0FBQyxFQUFFLENBQUMsQ0FBQyxDQUFDO29CQUUxQixHQUFHLElBQUksZUFBZSxLQUFLLENBQUMsS0FBSyxJQUFJLENBQUM7aUJBQ3RDO2dCQUNELFNBQVM7YUFDVDtTQUNEO1FBRUQsT0FBTyxHQUFHLENBQUM7SUFDWixDQUFDO0NBQ0Q7QUFFRCxPQUFPLEVBQUMsTUFBTSxFQUFDLENBQUMifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiZmlsZTovLy9ob21lL3J1bm5lci9FeWUvcGFyc2VyLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQU1BLE1BQU0sTUFBTTtJQUNYLEtBQUssQ0FBQyxNQUFlO1FBQ3BCLE1BQU0sT0FBTyxHQUFZO1lBQ3hCLElBQUksRUFBRSxFQUFFO1NBQ1IsQ0FBQTtRQUVELEtBQUksSUFBSSxDQUFDLEdBQUcsQ0FBQyxFQUFFLENBQUMsR0FBRSxNQUFNLENBQUMsTUFBTSxFQUFFLENBQUMsRUFBRSxFQUFDO1lBQ3BDLFFBQU8sTUFBTSxDQUFDLENBQUMsQ0FBQyxDQUFDLElBQUksRUFBQztnQkFDckIsS0FBSyxRQUFRO29CQUNaLElBQUcsTUFBTSxDQUFDLENBQUMsQ0FBQyxDQUFDLEtBQUssQ0FBQyxRQUFRLEVBQUUsQ0FBQyxRQUFRLENBQUMsR0FBRyxDQUFDLEVBQUM7d0JBQzNDLE9BQU8sQ0FBQyxJQUFJLENBQUMsSUFBSSxDQUFDOzRCQUNqQixJQUFJLEVBQUUsT0FBTzs0QkFDYixLQUFLLEVBQUUsTUFBTSxDQUFDLENBQUMsQ0FBQyxDQUFDLEtBQUssQ0FBQyxRQUFRLEVBQUU7eUJBQ2pDLENBQUMsQ0FBQztxQkFDSDt5QkFBSzt3QkFDTCxPQUFPLENBQUMsSUFBSSxDQUFDLElBQUksQ0FBQzs0QkFDakIsSUFBSSxFQUFFLFNBQVM7NEJBQ2YsS0FBSyxFQUFFLE1BQU0sQ0FBQyxDQUFDLENBQUMsQ0FBQyxLQUFLLENBQUMsUUFBUSxFQUFFO3lCQUNqQyxDQUFDLENBQUM7cUJBQ0g7b0JBQ0QsTUFBTTtnQkFFUCxLQUFLLFFBQVE7b0JBQ1osT0FBTyxDQUFDLElBQUksQ0FBQyxJQUFJLENBQUM7d0JBQ2pCLElBQUksRUFBRSxRQUFRO3dCQUNkLEtBQUssRUFBRSxNQUFNLENBQUMsQ0FBQyxDQUFDLENBQUMsS0FBSyxDQUFDLEtBQUssQ0FBQyxDQUFDLEVBQUUsTUFBTSxDQUFDLENBQUMsQ0FBQyxDQUFDLEtBQUssQ0FBQyxNQUFNLEdBQUcsQ0FBQyxDQUFDO3FCQUMzRCxDQUFDLENBQUM7b0JBQ0gsTUFBTTtnQkFFUCxLQUFLLFVBQVU7b0JBQ2QsT0FBTyxDQUFDLElBQUksQ0FBQyxJQUFJLENBQUM7d0JBQ2pCLElBQUksRUFBRSxVQUFVO3dCQUNoQixLQUFLLEVBQUUsTUFBTSxDQUFDLENBQUMsQ0FBQyxDQUFDLEtBQUs7d0JBQ3RCLFdBQVcsRUFBRTs0QkFDWixNQUFNLEVBQUUsTUFBTSxDQUFDLENBQUMsR0FBRyxDQUFDLENBQUMsQ0FBQyxLQUFLOzRCQUMzQixLQUFLLEVBQUUsTUFBTSxDQUFDLENBQUMsR0FBRyxDQUFDLENBQUMsQ0FBQyxLQUFLO3lCQUMxQjtxQkFDRCxDQUFDLENBQUM7b0JBQ0gsTUFBTTtnQkFFUCxLQUFLLFNBQVM7b0JBQ2IsTUFBTSxJQUFJLEdBQUcsTUFBTSxDQUFDLENBQUMsQ0FBQyxDQUFDLEtBQUssQ0FBQTtvQkFDNUIsTUFBTSxXQUFXLEdBQUcsRUFBRSxDQUFDO29CQUN2QixPQUFNLENBQUMsR0FBRyxNQUFNLENBQUMsTUFBTSxJQUFJLE1BQU0sQ0FBQyxDQUFDLENBQUMsQ0FBQyxJQUFJLEtBQUssS0FBSyxFQUFDO3dCQUNuRCxXQUFXLENBQUMsSUFBSSxDQUFDLE1BQU0sQ0FBQyxDQUFDLENBQUMsQ0FBQyxLQUFLLENBQUMsQ0FBQzt3QkFDbEMsQ0FBQyxFQUFFLENBQUM7cUJBQ0o7b0JBRUQsT0FBTyxDQUFDLElBQUksQ0FBQyxJQUFJLENBQUM7d0JBQ2pCLElBQUksRUFBRSxTQUFTO3dCQUNmLEtBQUssRUFBRSxJQUFJO3dCQUNYLFdBQVcsRUFBRSxXQUFXLENBQUMsTUFBTSxDQUFDLENBQUMsQ0FBQztxQkFDbEMsQ0FBQyxDQUFDO29CQUNILE1BQU07Z0JBRVAsS0FBSyxZQUFZO29CQUNoQixPQUFPLENBQUMsSUFBSSxDQUFDLElBQUksQ0FBQzt3QkFDakIsSUFBSSxFQUFFLFlBQVk7d0JBQ2xCLEtBQUssRUFBRSxNQUFNLENBQUMsQ0FBQyxDQUFDLENBQUMsS0FBSztxQkFDdEIsQ0FBQyxDQUFDO29CQUNILE1BQU07YUFDUDtTQUNEO1FBRUQsT0FBTyxPQUFPLENBQUM7SUFDaEIsQ0FBQztJQUVELE9BQU8sQ0FBQyxPQUFnQjtRQUN2QixJQUFJLEdBQUcsR0FBRyxFQUFFLENBQUM7UUFFYixLQUFJLE1BQU0sT0FBTyxJQUFJLE9BQU8sQ0FBQyxJQUFJLEVBQUM7WUFDakMsSUFBRyxPQUFPLENBQUMsSUFBSSxLQUFLLFNBQVMsRUFBQztnQkFDN0IsUUFBTyxPQUFPLENBQUMsS0FBSyxFQUFDO29CQUNwQixLQUFLLE9BQU87d0JBQ1gsR0FBRyxJQUFJLGVBQWUsT0FBTyxDQUFDLFdBQVcsQ0FBQyxJQUFJLENBQUMsRUFBRSxDQUFDLElBQUksQ0FBQTt3QkFDdEQsTUFBTTtvQkFFUCxLQUFLLEtBQUs7d0JBQ1QsR0FBRyxJQUFJLE9BQU8sT0FBTyxDQUFDLFdBQVcsQ0FBQyxJQUFJLENBQUMsRUFBRSxDQUFDLEdBQUcsQ0FBQzt3QkFDOUMsTUFBTTtpQkFDUDthQUNEO1NBQ0Q7UUFFRCxPQUFPLEdBQUcsQ0FBQztJQUNaLENBQUM7Q0FDRDtBQUVELE9BQU8sRUFBQyxNQUFNLEVBQUMsQ0FBQyJ9
