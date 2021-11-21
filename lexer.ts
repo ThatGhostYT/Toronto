@@ -12,11 +12,6 @@ class Lexer{
 			"print"
 		]
 
-		const booleans = [
-			"true",
-			"false"
-		]
-
 		for (let i = 0; i < code.length; i++) {
 			let char = code[i]
 

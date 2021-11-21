@@ -2,7 +2,7 @@ import {Lexer} from "./lexer.ts";
 import {Parser} from "./parser.ts";
 
 while(true){
-	const cmd = prompt("$eye > ");
+	const cmd = prompt("$eye ~ ");
 
 	if(cmd === "run"){
 		const lexer: Lexer = new Lexer();
