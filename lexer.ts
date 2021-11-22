@@ -9,7 +9,11 @@ class Lexer{
 		
 		let keywords = [
 			"var",
-			"print"
+			"print",
+			"true",
+			"false",
+			"wait",
+			"input"
 		]
 
 		let other: {[key: string]: string} = {
@@ -18,13 +22,17 @@ class Lexer{
 			"[": "LBracket",
 			"]": "RBracket",
 			"{": "LCurlyBracket",
-			"}": "RCurlyBracket"
+			"}": "RCurlyBracket",
+			"<": "GreaterThan",
+			">": "LessThan",
+			".": "Dot",
+			",": "Comma"
 		}
 
 		for (let i = 0; i < code.length; i++) {
 			let char = code[i]
 
-			if (char == "\n") {
+			if (char == "\n" || char == ";") {
 				tokens.push(new Token("EOL","EOL"))
 			}
 			else if (["1", "2", "3", "4", "5", "6", "7", "8", "9"].includes(char)) {
