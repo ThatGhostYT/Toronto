@@ -1,8 +1,6 @@
 import {Lexer} from "./lexer.ts";
 import {Parser} from "./parser.ts";
 
-let pastCode = ""
-
 while(true){
 	const cmd = prompt("$ eye ~");
 
@@ -16,7 +14,9 @@ while(true){
 
 			const compiledJS = parser.compile(ast, true);
 
-			eval(compiledJS)
+			if(compiledJS.startsWith("Error:")){
+				console.log(compiledJS);
+			} else eval(compiledJS);
 			break;
 		
 		case "compile":
@@ -50,20 +50,6 @@ while(true){
 
 		case "clear":
 			console.clear();
-			pastCode = "";
 			break;
-
-		default:
-			pastCode += cmd.endsWith(";") ? cmd : cmd + ";";
-
-			const lexer5 = new Lexer();
-			const tokens5 = lexer5.lex(pastCode);
-
-			const parser5 = new Parser();
-			const ast5 = parser5.parse(tokens5);
-
-			const compiledJS5 = parser5.compile(ast5, true);
-
-			eval(compiledJS5)
 	}
 }

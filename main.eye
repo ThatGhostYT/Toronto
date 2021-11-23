@@ -1,5 +1,2 @@
-var waitCount = input "How long do you want to wait?"
-
-print "Start"
-wait waitCount
-print "End"
+var? val = null
+print val

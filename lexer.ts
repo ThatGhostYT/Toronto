@@ -13,7 +13,7 @@ class Lexer{
 			"true",
 			"false",
 			"wait",
-			"input"
+			"null"
 		]
 
 		let other: {[key: string]: string} = {
@@ -26,7 +26,8 @@ class Lexer{
 			"<": "GreaterThan",
 			">": "LessThan",
 			".": "Dot",
-			",": "Comma"
+			",": "Comma",
+			"?": "QuestionMark"
 		}
 
 		for (let i = 0; i < code.length; i++) {
