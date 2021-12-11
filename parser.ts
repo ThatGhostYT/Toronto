@@ -80,7 +80,7 @@ class Parser{
 					break;
 
 				case "Identifier":
-					let body: any[] = [];
+					let body: Token[] = [];
 					while(i + 1 < tokens.length && tokens[i].type !== "EOL"){
 						if(tokens[--i].type === "Keyword") break;
 						else if(tokens[i].type === "Equals"){
@@ -107,6 +107,7 @@ class Parser{
 						type: tokens[i].type,
 						value: tokens[i].value
 					});
+					break;
 			}
 		}
 		
@@ -116,14 +117,15 @@ class Parser{
 	compile(program: Program, builtins: any){
 		let ret = "";
 
-		if (builtins) ret += `function sleep(t){
+		if (builtins) ret += `
+		function sleep(t){
 			const start = new Date().getTime();
 			for(let i = 0; i < 1e7; i++){
 				if((new Date().getTime() - start) > t){
 					break;
 				}
 			}
-		}; const input = prompt; `;
+		};`;
 
 		compileLoop:
 		for(const element of program.body){

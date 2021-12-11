@@ -10,8 +10,6 @@ class Lexer{
 		let keywords = [
 			"var",
 			"print",
-			"true",
-			"false",
 			"wait",
 			"null"
 		]
