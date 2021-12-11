@@ -64,6 +64,28 @@ class Parser{
 							type: "Null",
 							value: word,
 						});
+					} else if(word === "func"){
+						let funcname = tokens[++i];
+						const expressions = [];
+						while(i < tokens.length && tokens[i].type !== "LCurlyBracket"){
+							expressions.push(tokens[i].value);
+							i++;
+						}
+
+						const body = [];
+
+						while(i < tokens.length && tokens[i].type !== "RCurlyBracket"){
+							body.push(tokens[i]);
+							i++;
+						}
+
+						program.body.push({
+							type: "Keyword",
+							value: word,
+							expressions: expressions,
+							body: body,
+							name: funcname
+						});
 					} else{
 						const expressions = [];
 						while(i < tokens.length && tokens[i].type !== "EOL"){
@@ -80,24 +102,9 @@ class Parser{
 					break;
 
 				case "Identifier":
-					let body: Token[] = [];
-					while(i + 1 < tokens.length && tokens[i].type !== "EOL"){
-						if(tokens[--i].type === "Keyword") break;
-						else if(tokens[i].type === "Equals"){
-							body.push(tokens[i]);
-							i++;
-						} else{
-							if(tokens[--i].type === "Equals"){
-								body.push(tokens[i]);
-								i++;
-							} else i++;
-						}
-					}
-
 					program.body.push({
 						type: "Identifier",
-						value: tokens[i].value,
-						body: body
+						value: tokens[i].value
 					});
 					break;
 
@@ -117,15 +124,7 @@ class Parser{
 	compile(program: Program, builtins: boolean = true){
 		let ret = "";
 
-		if (builtins) ret += `
-		function sleep(t){
-			const start = new Date().getTime();
-			for(let i = 0; i < 1e7; i++){
-				if((new Date().getTime() - start) > t){
-					break;
-				}
-			}
-		};`;
+		if (builtins) ret += `function sleep(e){const t=(new Date).getTime();for(let n=0;n<1e7&&!((new Date).getTime()-t>e);n++);}`;
 
 		compileLoop:
 		for(const element of program.body){
@@ -136,10 +135,7 @@ class Parser{
 						break;
 
 					case "var":
-						if(this.compile(this.parse(element.body), false).includes("null")){
-							ret = `Error: Variable is not null safe.`;
-							break compileLoop;
-						}
+						if(this.compile(this.parse(element.body), false).includes("null")) throw new Error("Variable is not null safe.");
 
 						ret += `const ${element.varname}=${this.compile(this.parse(element.body), false)};`;
 						break;
@@ -151,6 +147,13 @@ class Parser{
 					case "wait":
 						ret += `sleep(${Number(element.expressions[0]) * 1000});`;
 						break;
+
+					case "func":
+						ret += `function ${element.expressions.join("")}${this.compile(this.parse(element.body),false)}};`
+						break;
+
+					case "return":
+						ret += `return ${element.expressions.join("")};`
 				}
 			} else {
 				switch (element.type) {
@@ -159,11 +162,19 @@ class Parser{
 						break;
 
 					case "Identifier":
-						ret += `${element.value}${this.compile(this.parse(element.body),false)}`;
+						ret += `${element.value}`;
 						break;
 
 					case "Null":
 						ret += "null";
+						break;
+
+					case "LParen":
+						ret += "(";
+						break;
+					
+					case "RParen":
+						ret += ")";
 						break;
 
 					default:

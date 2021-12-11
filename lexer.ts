@@ -11,7 +11,11 @@ class Lexer{
 			"var",
 			"print",
 			"wait",
-			"null"
+			"null",
+			"true",
+			"false",
+			"func",
+			"return"
 		]
 
 		let other: {[key: string]: string} = {

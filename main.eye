@@ -1,10 +1,5 @@
-# Variables
-var a = "Hello World!"
-var b = "Goodbye World!"
-var? c = null
+func ret(arg){
+	return arg
+}
 
-# Main
-print a
-wait 5
-print b
-print c
+print ret("Hello World!")
