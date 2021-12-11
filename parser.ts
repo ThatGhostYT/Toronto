@@ -114,7 +114,7 @@ class Parser{
 		return program;
 	}
 
-	compile(program: Program, builtins: any){
+	compile(program: Program, builtins: boolean = true){
 		let ret = "";
 
 		if (builtins) ret += `

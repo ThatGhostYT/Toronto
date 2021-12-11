@@ -1,55 +1,71 @@
 import {Lexer} from "./lexer.ts";
 import {Parser} from "./parser.ts";
 
+const lexer = new Lexer();
+const parser = new Parser();
+
+let past = "";
+
 while(true){
-	const cmd = prompt("$ eye ~");
+	const cmd = prompt("$eye -");
 
-	switch(cmd){
-		case "run":
-			const lexer = new Lexer();
-			const tokens = lexer.lex(Deno.readTextFileSync("./main.eye"));
-
-			const parser = new Parser();
-			const ast = parser.parse(tokens);
-
-			const compiledJS = parser.compile(ast, true);
-
-			if(compiledJS.startsWith("Error:")){
-				console.log(compiledJS);
-			} else eval(compiledJS);
-			break;
+	if(cmd === "run"){
+		const tokens = lexer.lex(Deno.readTextFileSync("./main.eye"));
 		
-		case "compile":
-			const lexer2 = new Lexer();
-			const tokens2 = lexer2.lex(Deno.readTextFileSync("./main.eye"));
+		const ast = parser.parse(tokens);
 
-			const parser2 = new Parser();
-			const ast2 = parser2.parse(tokens2);
+		const compiled = parser.compile(ast);
 
-			const compiledJS2 = parser2.compile(ast2, true);
+		eval(compiled);
 
-			console.log(compiledJS2);
-			break;
+	} else if(cmd === "compile"){
+		const tokens = lexer.lex(Deno.readTextFileSync("./main.eye"));
+		
+		const ast = parser.parse(tokens);
 
-		case "parse":
-			const lexer3 = new Lexer();
-			const tokens3 = lexer3.lex(Deno.readTextFileSync("./main.eye"));
+		const compiled = parser.compile(ast);
 
-			const parser3 = new Parser();
-			const ast3 = parser3.parse(tokens3);
+		console.log(compiled);
 
-			console.log(ast3);
-			break;
+	} else if(cmd === "parse"){
+		const tokens = lexer.lex(Deno.readTextFileSync("./main.eye"));
+		
+		const ast = parser.parse(tokens);
 
-		case "lex":
-			const lexer4 = new Lexer();
-			const tokens4 = lexer4.lex(Deno.readTextFileSync("./main.eye"));
+		console.log(ast);
 
-			console.log(tokens4);
-			break;
+	} else if(cmd === "lex"){
+		const tokens = lexer.lex(Deno.readTextFileSync("./main.eye"));
+		
+		console.log(tokens);
 
-		case "clear":
-			console.clear();
-			break;
+	} else if(cmd === "clear"){
+		console.clear();
+		past = "";
+
+	} else if(cmd === "cache"){
+		console.log(past);
+
+	} else{
+		let builtins;
+
+		const tokens = lexer.lex(cmd);
+		console.log(tokens);
+
+		const ast = parser.parse(tokens);
+		console.log(ast);
+
+		if(past !== ""){
+			builtins = false;
+		} else{
+			builtins = true;
+		}
+
+		const compiled = parser.compile(ast,builtins);
+		console.log(past + compiled);
+
+		past += compiled
+
+		eval(past);
 	}
 }
