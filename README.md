@@ -1,5 +1,6 @@
 # Toronto
 Toronto is a simple, general purpose programming language which compiles into javascript.
+> **Toronto is still a work in progress.**
 
 ## Getting Started
 Download [Deno](https://deno.land/), which is an alternative JavaScript runtime to Node.
