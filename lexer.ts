@@ -12,8 +12,6 @@ class Lexer{
 			"print",
 			"wait",
 			"null",
-			"true",
-			"false",
 			"func",
 			"return",
 			"input"
@@ -39,7 +37,7 @@ class Lexer{
 			if (char == "\n" || char == ";") {
 				tokens.push(new Token("EOL","EOL"))
 			}
-			else if (["1", "2", "3", "4", "5", "6", "7", "8", "9"].includes(char)) {
+			else if (["0","1", "2", "3", "4", "5", "6", "7", "8", "9"].includes(char)) {
 				let cur = char;
 				while (["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "."].includes(code[i + 1]) && i + 1 < code.length) {
 					cur += code[i + 1];
