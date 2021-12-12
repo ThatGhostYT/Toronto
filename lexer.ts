@@ -15,7 +15,8 @@ class Lexer{
 			"true",
 			"false",
 			"func",
-			"return"
+			"return",
+			"input"
 		]
 
 		let other: {[key: string]: string} = {

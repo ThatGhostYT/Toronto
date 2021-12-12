@@ -1,0 +1,10 @@
+func add(x,y){
+	return x + y
+}
+
+func main(){
+	var x = toInt(input "Pick any number:")
+	var y = toInt(input "Pick another number:")
+	var sum = "The answer is: " + add(x,y)
+	print sum
+}

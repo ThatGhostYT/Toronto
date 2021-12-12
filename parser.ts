@@ -29,7 +29,7 @@ class Parser{
 				case "String":
 					program.body.push({
 						type: "String",
-						value: tokens[i].value.slice(1, tokens[i].value.length - 1),
+						value: tokens[i].value
 					});
 					break;
 
@@ -124,7 +124,7 @@ class Parser{
 	compile(program: Program, builtins: boolean = true){
 		let ret = "";
 
-		if (builtins) ret += `function sleep(e){const t=(new Date).getTime();for(let n=0;n<1e7&&!((new Date).getTime()-t>e);n++);}`;
+		if (builtins) ret += `function sleep(e){const t=(new Date).getTime();for(let n=0;n<1e7&&!((new Date).getTime()-t>e);n++);} const toInt=parseInt;`;
 
 		compileLoop:
 		for(const element of program.body){
@@ -153,12 +153,17 @@ class Parser{
 						break;
 
 					case "return":
-						ret += `return ${element.expressions.join("")};`
+						ret += `return ${element.expressions.join("")};`;
+						break;
+					
+					case "input":
+						ret += `prompt(${element.expressions.join("")});`;
+						break;
 				}
 			} else {
 				switch (element.type) {
 					case "String":
-						ret += `"${element.value}"`;
+						ret += `${element.value}`;
 						break;
 
 					case "Identifier":
