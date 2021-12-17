@@ -1,7 +1,4 @@
 func main(){
-	mut a = 6
-	a = "Hello World!"
-	print a
-	a = null
-	print a
+	mut val = null
+	print ++val # javascript being funny
 }
