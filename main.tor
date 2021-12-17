@@ -1,4 +1,4 @@
 func main(){
 	mut val = null
-	print ++val # javascript being funny
+	print ++val
 }
