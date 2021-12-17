@@ -4,13 +4,15 @@ interface Program{
 	body: {[key: string]: any}[];
 }
 
+const functionNames: any[] = ["toInt"];
+
 class Parser{
 	parse(tokens: Token[]){
 		const program: Program = {
 			body: []
 		}
 
-		for(let i = 0; i< tokens.length; i++){
+		for(let i = 0; i < tokens.length; i++){
 			switch(tokens[i].type){
 				case "Number":
 					if(tokens[i].value.toString().includes(".")){
@@ -41,9 +43,7 @@ class Parser{
 							type: "Boolean",
 							value: word
 						});
-					} else if (word === "var") {
-						if(tokens[++i].type === "QuestionMark") word += "?";
-						else i--;
+					} else if (word === "var" || word === "mut") {
 						let varname = tokens[++i]
 						i++
 						i++
@@ -66,6 +66,7 @@ class Parser{
 						});
 					} else if(word === "func"){
 						let funcname = tokens[++i];
+						functionNames.push(funcname.value);
 						const expressions = [];
 						while(i < tokens.length && tokens[i].type !== "LCurlyBracket"){
 							expressions.push(tokens[i].value);
@@ -89,7 +90,7 @@ class Parser{
 					} else{
 						const expressions = [];
 						while(i < tokens.length && tokens[i].type !== "EOL"){
-							expressions.push(tokens[i].value);
+							expressions.push(tokens[i]);
 							i++;
 						}
 
@@ -102,6 +103,14 @@ class Parser{
 					break;
 
 				case "Identifier":
+					if(tokens[i+1] && tokens[i].value === "("){
+						i--;
+						if(!functionNames.includes(tokens[i].value)){
+							if(tokens[i].value === "main") throw new Error("No main function found!");
+							else throw new Error(`Unknown function ${tokens[i].value}.`);
+						}
+					}
+
 					program.body.push({
 						type: "Identifier",
 						value: tokens[i].value
@@ -109,7 +118,6 @@ class Parser{
 					break;
 
 				default:
-					if(tokens[i].type === "EOL" || tokens[i].type === "Comment") break;
 					program.body.push({
 						type: tokens[i].type,
 						value: tokens[i].value
@@ -131,21 +139,19 @@ class Parser{
 			if(element.type === "Keyword"){
 				switch(element.value){
 					case "print":
-						ret += `console.log(${element.expressions.join("")});`
+						ret += `console.log(${this.compile(this.parse(element.expressions), false)});`
 						break;
 
 					case "var":
-						if(this.compile(this.parse(element.body), false).includes("null")) throw new Error("Variable is not null safe.");
-
 						ret += `const ${element.varname}=${this.compile(this.parse(element.body), false)};`;
 						break;
 
-					case "var?":
-						ret += `const ${element.varname}=${this.compile(this.parse(element.body), false)};`;
+					case "mut":
+						ret += `let ${element.varname}=${this.compile(this.parse(element.body), false)};`;
 						break;
 
 					case "wait":
-						ret += `sleep(${Number(element.expressions[0]) * 1000});`;
+						ret += `sleep(${Number(this.compile(this.parse(element.expressions),false)) * 1000});`;
 						break;
 
 					case "func":
@@ -153,11 +159,19 @@ class Parser{
 						break;
 
 					case "return":
-						ret += `return ${element.expressions.join("")};`;
+						ret += `return ${this.compile(this.parse(element.expressions),false)};`;
 						break;
 					
 					case "input":
-						ret += `prompt(${element.expressions.join("")});`;
+						ret += `prompt(${this.compile(this.parse(element.expressions),false)});`;
+						break;
+
+					case "using":
+						ret += `import ${this.compile(this.parse(element.expressions),false)};`;
+						break;
+
+					case "export":
+						ret += `export {${this.compile(this.parse(element.expressions),false)}};`
 						break;
 				}
 			} else {
@@ -180,6 +194,10 @@ class Parser{
 					
 					case "RParen":
 						ret += ")";
+						break;
+
+					case "EOL":
+						ret += ";";
 						break;
 
 					default:

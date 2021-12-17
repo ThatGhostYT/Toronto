@@ -10,32 +10,32 @@ while(true){
 	const cmd = prompt("$eye -");
 
 	if(cmd === "run"){
-		const tokens = lexer.lex(Deno.readTextFileSync("./main.tor") + "\nmain([\"0.01\"])");
+		const tokens = lexer.lex(Deno.readTextFileSync("./main.tor"));
 		
 		const ast = parser.parse(tokens);
 
 		const compiled = parser.compile(ast);
 
-		eval(compiled);
+		eval(compiled + "main();");
 
 	} else if(cmd === "compile"){
-		const tokens = lexer.lex(Deno.readTextFileSync("./main.tor") + "\nmain([\"0.01\"])");
+		const tokens = lexer.lex(Deno.readTextFileSync("./main.tor"));
 		
 		const ast = parser.parse(tokens);
 
 		const compiled = parser.compile(ast);
 
-		console.log(compiled);
+		console.log(compiled + "main();");
 
 	} else if(cmd === "parse"){
-		const tokens = lexer.lex(Deno.readTextFileSync("./main.tor") + "\nmain([\"0.01\"])");
+		const tokens = lexer.lex(Deno.readTextFileSync("./main.tor"));
 		
 		const ast = parser.parse(tokens);
 
 		console.log(ast);
 
 	} else if(cmd === "lex"){
-		const tokens = lexer.lex(Deno.readTextFileSync("./main.tor") + "\nmain([\"0.01\"])");
+		const tokens = lexer.lex(Deno.readTextFileSync("./main.tor"));
 		
 		console.log(tokens);
 

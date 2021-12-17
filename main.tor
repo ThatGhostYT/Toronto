@@ -1,4 +1,7 @@
-func main(args){
-	var ver = args[0]
-	print ver
+func main(){
+	mut a = 6
+	a = "Hello World!"
+	print a
+	a = null
+	print a
 }
