@@ -118,6 +118,7 @@ class Parser{
 					break;
 
 				default:
+					if(tokens[i].type === "Comment") break;
 					program.body.push({
 						type: tokens[i].type,
 						value: tokens[i].value

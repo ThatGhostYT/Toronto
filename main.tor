@@ -1,4 +1,3 @@
 func main(){
-	mut val = null
-	print ++val
+    print "Hello World!"
 }
