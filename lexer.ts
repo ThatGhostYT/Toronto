@@ -17,8 +17,7 @@ class Lexer{
 			"input",
 			"mut",
 			"using",
-			"export",
-			"from"
+			"export"
 		]
 
 		let other: {[key: string]: string} = {
