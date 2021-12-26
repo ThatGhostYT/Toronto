@@ -1,4 +1,4 @@
 func main(){
-    mut val = 7
-    print **val
+    mut val = 25
+    print sqrt(val)
 }

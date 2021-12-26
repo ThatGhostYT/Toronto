@@ -4,7 +4,7 @@ interface Program{
 	body: {[key: string]: any}[];
 }
 
-const functionNames: any[] = ["toInt"];
+const functionNames: any[] = ["toInt","sqrt"];
 
 class Parser{
 	parse(tokens: Token[]){
@@ -133,7 +133,7 @@ class Parser{
 	compile(program: Program, builtins: boolean = true){
 		let ret = "";
 
-		if (builtins) ret += `function sleep(e){const t=(new Date).getTime(); for(let n=0;n<1e7&&!((new Date).getTime()-t>e);n++);} const toInt=parseIn;
+		if (builtins) ret += `function sleep(e){const t=(new Date).getTime(); for(let n=0;n<1e7&&!((new Date).getTime()-t>e);n++);} const toInt=parseInt; const sqrt=Math.sqrt;`;
 
 		compileLoop:
 		for(const element of program.body){
