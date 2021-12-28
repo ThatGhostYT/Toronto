@@ -4,7 +4,7 @@ interface Program{
 	body: {[key: string]: any}[];
 }
 
-const functionNames: any[] = ["toInt","sqrt"];
+const defined: any[] = ["toInt","sqrt","request"];
 
 class Parser{
 	parse(tokens: Token[]){
@@ -31,7 +31,17 @@ class Parser{
 				case "String":
 					program.body.push({
 						type: "String",
-						value: tokens[i].value
+						value: tokens[i].value,
+						children: {
+							length: tokens[i].value.length
+						}
+					});
+					break;
+				
+				case "TemplateString":
+					program.body.push({
+						type: "Template",
+						value: `\`${tokens[i].value}\``
 					});
 					break;
 
@@ -66,7 +76,7 @@ class Parser{
 						});
 					} else if(word === "func"){
 						let funcname = tokens[++i];
-						functionNames.push(funcname.value);
+						defined.push(funcname.value);
 						const expressions = [];
 						while(i < tokens.length && tokens[i].type !== "LCurlyBracket"){
 							expressions.push(tokens[i].value);
@@ -87,6 +97,11 @@ class Parser{
 							body: body,
 							name: funcname
 						});
+					} else if(word === "async" || word === "await"){
+						program.body.push({
+							type: "Keyword",
+							value: word
+						});
 					} else{
 						const expressions = [];
 						while(i < tokens.length && tokens[i].type !== "EOL"){
@@ -103,12 +118,8 @@ class Parser{
 					break;
 
 				case "Identifier":
-					if(tokens[i+1] && tokens[i].value === "("){
-						i--;
-						if(!functionNames.includes(tokens[i].value)){
-							if(tokens[i].value === "main") throw new Error("No main function found!");
-							else throw new Error(`Unknown function ${tokens[i].value}.`);
-						}
+					if(tokens[i+1].value === "("){
+						if(!defined.includes(tokens[i].value)) throw new Error(`Undefined Function ${tokens[i].value}`);
 					}
 
 					program.body.push({
@@ -117,8 +128,13 @@ class Parser{
 					});
 					break;
 
+				// case "Dot":
+				// 	const token = tokens[--i];
+				// 	if(!(tokens[i+2].type === "Identifier") && !(token.children[tokens[i].value]))
+				// 	break;
+
 				default:
-					if(tokens[i].type === "Comment") break;
+					if(tokens[i].type === "Comment" || tokens[i].type === "EOL") break;
 					program.body.push({
 						type: tokens[i].type,
 						value: tokens[i].value
@@ -133,7 +149,7 @@ class Parser{
 	compile(program: Program, builtins: boolean = true){
 		let ret = "";
 
-		if (builtins) ret += `function sleep(e){const t=(new Date).getTime(); for(let n=0;n<1e7&&!((new Date).getTime()-t>e);n++);} const toInt=parseInt; const sqrt=Math.sqrt;`;
+		if (builtins) ret += `function sleep(e){const t=(new Date).getTime(); for(let n=0;n<1e7&&!((new Date).getTime()-t>e);n++);} const toInt=parseInt; const sqrt=Math.sqrt; const request=fetch;`;
 
 		compileLoop:
 		for(const element of program.body){
@@ -174,11 +190,35 @@ class Parser{
 					case "export":
 						ret += `export {${this.compile(this.parse(element.expressions),false)}};`
 						break;
+
+					case "async":
+						ret += "async ";
+						break;
+
+					case "await":
+						ret += "await ";
+						break;
+
+					case "if":
+						ret += `if ${this.compile(this.parse(element.expressions),false)}`
+						break;
+
+					case "elif":
+						ret += `else if ${this.compile(this.parse(element.expressions),false)}`
+						break;
+
+					case "else":
+						ret += `else ${this.compile(this.parse(element.expressions),false)}`
+						break;
 				}
 			} else {
 				switch (element.type) {
 					case "String":
 						ret += `${element.value}`;
+						break;
+
+					case "Template":
+						ret += `\`${element.value.split("'")[1]}\``;
 						break;
 
 					case "Identifier":
@@ -195,10 +235,6 @@ class Parser{
 					
 					case "RParen":
 						ret += ")";
-						break;
-
-					case "EOL":
-						ret += ";";
 						break;
 
 					default:

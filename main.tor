@@ -1,4 +1,4 @@
-func main(){
-    mut val = 25
-    print sqrt(val)
+async func main(){
+	var msg = input "What do you want me to echo?"
+	print 'Echo: ${msg}'
 }

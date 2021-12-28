@@ -17,7 +17,12 @@ class Lexer{
 			"input",
 			"mut",
 			"using",
-			"export"
+			"export",
+			"async",
+			"await",
+			"if",
+			"else",
+			"elif"
 		]
 
 		let other: {[key: string]: string} = {
@@ -57,6 +62,15 @@ class Lexer{
 				i++;
 				tokens.push(new Token("String", "\"" + cur + "\""))
 			}
+			else if(char == "'"){
+				let cur = "";
+				while (code[i + 1] != "'" && i + 1 < code.length) {
+					cur += code[i + 1];
+					i++;
+				}
+				i++;
+				tokens.push(new Token("TemplateString", "\'" + cur + "\'"))
+			}
 			else if (operators.includes(char)) {
 				tokens.push(new Token("Operator", char))
 			}
@@ -82,11 +96,7 @@ class Lexer{
 				tokens.push(new Token("Comment", cur))
 			}
 			else if (char == "=") {
-				if (i + 1 < code.length && code[i + 1] == "=") {
-					tokens.push(new Token("DEquals", "=="))
-				} else {
-					tokens.push(new Token("Equals", char))
-				}
+				tokens.push(new Token("Equals", char))
 			}
 			else if (Object.keys(other).includes(char)) {
 				tokens.push(new Token(other[char], char))

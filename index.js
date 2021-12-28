@@ -1,7 +1,7 @@
 console.clear();
 
-import {Lexer} from "./lexer.ts";
-import {Parser} from "./parser.ts";
+import {Lexer} from "./src/lexer.ts";
+import {Parser} from "./src/parser.ts";
 
 const lexer = new Lexer();
 const parser = new Parser();
