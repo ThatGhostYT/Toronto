@@ -4,7 +4,7 @@ interface Program{
 	body: {[key: string]: any}[];
 }
 
-const defined: any[] = ["toInt","sqrt","request"];
+const defined: any[] = ["toInt","sqrt","exec"];
 
 class Parser{
 	parse(tokens: Token[]){
@@ -118,7 +118,7 @@ class Parser{
 					break;
 
 				case "Identifier":
-					if(tokens[i+1].value === "("){
+					if(tokens[i+1]?.value === "("){
 						if(!defined.includes(tokens[i].value)) throw new Error(`Undefined Function ${tokens[i].value}`);
 					}
 
@@ -149,7 +149,7 @@ class Parser{
 	compile(program: Program, builtins: boolean = true){
 		let ret = "";
 
-		if (builtins) ret += `function sleep(e){const t=(new Date).getTime(); for(let n=0;n<1e7&&!((new Date).getTime()-t>e);n++);} const toInt=parseInt; const sqrt=Math.sqrt; const request=fetch;`;
+		if (builtins) ret += `const lexer=new Lexer,parser=new Parser;function sleep(e){const r=(new Date).getTime();for(let t=0;t<1e7&&!((new Date).getTime()-r>e);t++);}const toInt=parseInt,sqrt=Math.sqrt;function exec(code){eval(parser.compile(parser.parse(lexer.lex(code)),!1))}`;
 
 		compileLoop:
 		for(const element of program.body){
@@ -183,14 +183,6 @@ class Parser{
 						ret += `prompt(${this.compile(this.parse(element.expressions),false)});`;
 						break;
 
-					case "using":
-						ret += `import ${this.compile(this.parse(element.expressions),false)};`;
-						break;
-
-					case "export":
-						ret += `export {${this.compile(this.parse(element.expressions),false)}};`
-						break;
-
 					case "async":
 						ret += "async ";
 						break;
@@ -199,17 +191,17 @@ class Parser{
 						ret += "await ";
 						break;
 
-					case "if":
-						ret += `if ${this.compile(this.parse(element.expressions),false)}`
-						break;
+					// case "if":
+					// 	ret += `if ${this.compile(this.parse(element.expressions),false)};`;
+					// 	break;
 
-					case "elif":
-						ret += `else if ${this.compile(this.parse(element.expressions),false)}`
-						break;
+					// case "elif":
+					// 	ret += `else if ${this.compile(this.parse(element.expressions),false)};`;
+					// 	break;
 
-					case "else":
-						ret += `else ${this.compile(this.parse(element.expressions),false)}`
-						break;
+					// case "else":
+					// 	ret += `else ${this.compile(this.parse(element.expressions),false)};`;
+					// 	break;
 				}
 			} else {
 				switch (element.type) {
@@ -234,7 +226,7 @@ class Parser{
 						break;
 					
 					case "RParen":
-						ret += ")";
+						ret += ");";
 						break;
 
 					default:

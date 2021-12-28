@@ -16,13 +16,11 @@ class Lexer{
 			"return",
 			"input",
 			"mut",
-			"using",
-			"export",
 			"async",
 			"await",
-			"if",
-			"else",
-			"elif"
+			// "if",
+			// "else",
+			// "elif"
 		]
 
 		let other: {[key: string]: string} = {
@@ -36,7 +34,8 @@ class Lexer{
 			">": "LessThan",
 			".": "Dot",
 			",": "Comma",
-			"?": "QuestionMark"
+			"?": "QuestionMark",
+			"!": "BangMark"
 		}
 
 		for (let i = 0; i < code.length; i++) {
