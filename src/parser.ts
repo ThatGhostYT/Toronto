@@ -4,7 +4,7 @@ interface Program{
 	body: {[key: string]: any}[];
 }
 
-const defined: any[] = ["toInt","sqrt","exec"];
+const defined: any[] = ["toInt","sqrt","exec","using"];
 
 class Parser{
 	parse(tokens: Token[]){
@@ -133,8 +133,15 @@ class Parser{
 				// 	if(!(tokens[i+2].type === "Identifier") && !(token.children[tokens[i].value]))
 				// 	break;
 
+				case "EOL":
+					program.body.push({
+						type: "EOL",
+						value: ";"
+					});
+					break;
+
 				default:
-					if(tokens[i].type === "Comment" || tokens[i].type === "EOL") break;
+					if(tokens[i].type === "Comment") break;
 					program.body.push({
 						type: tokens[i].type,
 						value: tokens[i].value
@@ -149,7 +156,7 @@ class Parser{
 	compile(program: Program, builtins: boolean = true){
 		let ret = "";
 
-		if (builtins) ret += `const lexer=new Lexer,parser=new Parser;function sleep(e){const r=(new Date).getTime();for(let t=0;t<1e7&&!((new Date).getTime()-r>e);t++);}const toInt=parseInt,sqrt=Math.sqrt;function exec(code){eval(parser.compile(parser.parse(lexer.lex(code)),!1))}`;
+		if (builtins) ret += `const lexer=new Lexer,parser=new Parser;function sleep(e){const r=(new Date).getTime();for(let t=0;t<1e7&&!((new Date).getTime()-r>e);t++);}const toInt=parseInt,sqrt=Math.sqrt;function exec(code){eval(parser.compile(parser.parse(lexer.lex(code)),!1))};`;
 
 		compileLoop:
 		for(const element of program.body){
@@ -226,7 +233,7 @@ class Parser{
 						break;
 					
 					case "RParen":
-						ret += ");";
+						ret += ")";
 						break;
 
 					default:
