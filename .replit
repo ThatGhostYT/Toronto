@@ -1,1 +1,1 @@
-lang="deno"
+run="deno run --allow-all index.js"

@@ -18,9 +18,7 @@ class Lexer{
 			"mut",
 			"async",
 			"await",
-			// "if",
-			// "else",
-			// "elif"
+			"new"
 		]
 
 		let other: {[key: string]: string} = {
