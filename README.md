@@ -5,7 +5,7 @@ Toronto is a simple, general purpose programming language which compiles into ja
 ## Getting Started
 Download [Deno](https://deno.land/), which is an alternative JavaScript runtime to Node.
 
-Then, download this repository and use it as a template, don't touch any of the files besides `main.tor`.
+Then, download this repository and use it as a template, don't touch any of the files besides `main.toronto`.
 
 ### Comments
 To make a comment, use a `#` and then that entire line will be ignored.
