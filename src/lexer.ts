@@ -18,7 +18,7 @@ class Lexer{
 			"mut",
 			"async",
 			"await",
-			"new"
+			"promise"
 		]
 
 		let other: {[key: string]: string} = {

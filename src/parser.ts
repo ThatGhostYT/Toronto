@@ -31,10 +31,7 @@ class Parser{
 				case "String":
 					program.body.push({
 						type: "String",
-						value: tokens[i].value,
-						children: {
-							length: tokens[i].value.length
-						}
+						value: tokens[i].value
 					});
 					break;
 				
@@ -97,11 +94,27 @@ class Parser{
 							body: body,
 							name: funcname
 						});
-					} else if(word === "async" || word === "await" || word === "new"){
+					} else if(word === "async" || word === "await"){
 						program.body.push({
 							type: "Keyword",
 							value: word
 						});
+					} else if(word === "promise"){
+						let promname = tokens[++i]
+						i++
+						i++
+						let body = []
+						while(i < tokens.length && tokens[i].type !== "EOL"){
+							body.push(tokens[i]);
+							i++;
+						}
+						
+						program.body.push({
+							type: "Keyword",
+							value: word,
+							body: body,
+							promname: promname.value,
+						})
 					} else{
 						const expressions = [];
 						while(i < tokens.length && tokens[i].type !== "EOL"){
@@ -127,11 +140,6 @@ class Parser{
 						value: tokens[i].value
 					});
 					break;
-
-				// case "Dot":
-				// 	const token = tokens[--i];
-				// 	if(!(tokens[i+2].type === "Identifier") && !(token.children[tokens[i].value]))
-				// 	break;
 
 				case "EOL":
 					program.body.push({
@@ -179,7 +187,7 @@ class Parser{
 						break;
 
 					case "func":
-						ret += `function ${element.expressions.join("")}${this.compile(this.parse(element.body),false)}};`
+						ret += `function ${element.expressions.join("")}${this.compile(this.parse(element.body),false)}};`;
 						break;
 
 					case "return":
@@ -198,8 +206,8 @@ class Parser{
 						ret += "await ";
 						break;
 
-					case "new":
-						ret += "new ";
+					case "promise":
+						ret += `let ${element.promname}=new Promise((res,rej)=>res(${this.compile(this.parse(element.body),false)}));`;
 						break;
 				}
 			} else {
