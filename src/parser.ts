@@ -207,7 +207,7 @@ class Parser{
 						break;
 
 					case "promise":
-						ret += `let ${element.promname}=new Promise((res,rej)=>res(${this.compile(this.parse(element.body),false)}));`;
+						ret += `const ${element.promname}=new Promise((res,rej)=>res(${this.compile(this.parse(element.body),false)}));`;
 						break;
 				}
 			} else {

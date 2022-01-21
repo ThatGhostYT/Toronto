@@ -1,3 +1,4 @@
 async func main(){
-	print "Hello World!"
+	promise hello = "Hello World!"
+	print await hello
 }

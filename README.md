@@ -96,3 +96,14 @@ func add(x,y){
 	return x + y
 }
 ```
+
+### Creating a promise
+To create a promise, use the `promise` keyword, followed by the name of the promise and the resolvable value.
+```javascript
+promise hello = "Hello World!"
+```
+
+Then use the `await` keyword in an asynchronous function to resolve the promise.
+```python
+print await hello
+```
