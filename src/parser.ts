@@ -224,6 +224,14 @@ class Parser{
 						ret += `${element.value}`;
 						break;
 
+					case "Boolean":
+						if(element.value === "true"){
+							ret += "!0";
+						} else{
+							ret += "!1";
+						}
+						break;
+
 					case "Null":
 						ret += "null";
 						break;
