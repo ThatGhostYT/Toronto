@@ -114,7 +114,7 @@ class Parser{
 							value: word,
 							body: body,
 							promname: promname.value,
-						})
+						});
 					} else{
 						const expressions = [];
 						while(i < tokens.length && tokens[i].type !== "EOL"){
@@ -164,7 +164,7 @@ class Parser{
 	compile(program: Program, builtins: boolean = true){
 		let ret = "";
 
-		if (builtins) ret += `const lexer=new Lexer,parser=new Parser;function sleep(e){const r=(new Date).getTime();for(let t=0;t<1e7&&!((new Date).getTime()-r>e);t++);}const toInt=parseInt,sqrt=Math.sqrt;function exec(code){eval(parser.compile(parser.parse(lexer.lex(code)),!1))}`;
+		if (builtins) ret += `const lexer=new Lexer,parser=new Parser;function sleep(e){const r=(new Date).getTime();for(let t=0;t<1e7&&!((new Date).getTime()-r>e);t++);}const toInt=parseInt,sqrt=Math.sqrt;function exec(code){eval(parser.compile(parser.parse(lexer.lex(code),!1)))}`;
 
 		compileLoop:
 		for(const element of program.body){

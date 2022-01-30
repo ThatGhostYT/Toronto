@@ -20,7 +20,9 @@ class Lexer{
 			"await",
 			"promise",
 			"false",
-			"true"
+			"true",
+			"using",
+			"export"
 		]
 
 		let other: {[key: string]: string} = {
